@@ -37,13 +37,17 @@ export class AppModule { }
 
 function getApiUrl(configuredApiUrl: string): string {
     if (configuredApiUrl) {
-        return configuredApiUrl;
+        return withApiSuffix(configuredApiUrl);
     }
 
     const isAngularDevServer = window.location.hostname === 'localhost' && window.location.port === '4200';
     if (isAngularDevServer) {
-        return 'http://localhost:7071';
+        return 'http://localhost:7071/api';
     }
 
-    return '';
+    return withApiSuffix(window.location.origin);
+}
+
+function withApiSuffix(url: string): string {
+    return url.endsWith('/api') ? url : `${url}/api`;
 }

@@ -16,11 +16,14 @@ public class PersonFunction
         _adUserHelper = adUserHelper;
     }
 
-    [ProducesResponseType(typeof(PersonDTO), (int)HttpStatusCode.Created)]
+    [OpenApiOperation(nameof(CreatePerson), "Person")]
+    [OpenApiRequest<PersonDTO>]
+    [OpenApiResponseWithBody<PersonDTO>(HttpStatusCode.Created)]
+    [OpenApiResponseBadRequest]
+    [RoleAuthorize(Constants.Role.Authenticated)]
     [Function("create-person")]
     public async Task<IActionResult> CreatePerson(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "v1/person/create")]
-            [RequestBodyType(typeof(PersonDTO), "model")]
             HttpRequest httpRequest)
     {
         if (httpRequest.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
@@ -47,7 +50,9 @@ public class PersonFunction
         return new OkResult();
     }
 
-    [ProducesResponseType(typeof(IEnumerable<PersonDTO>), (int)HttpStatusCode.OK)]
+    [OpenApiOperation(nameof(GetAllPersons), "Person")]
+    [OpenApiResponseOk<IEnumerable<PersonDTO>>]
+    [RoleAuthorize(Constants.Role.Authenticated)]
     [Function("get-all-persons")]
     public async Task<IActionResult> GetAllPersons(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "v1/person/get-all")]

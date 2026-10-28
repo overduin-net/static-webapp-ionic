@@ -2,6 +2,12 @@ public class Constants
 {
     public const string RowKey = "RowKey";
     public const string PartitionKey = "PartitionKey";
+
+    public static class Role
+    {
+        public const string Authenticated = "authenticated";
+        public const string Administrator = "administrator";
+    }
     
     public class StaticWebAppRole
     {

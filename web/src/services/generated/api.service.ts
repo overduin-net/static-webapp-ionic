@@ -37,15 +37,15 @@ export class ApiService extends BaseService {
     constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_URL) baseUrl?: string) {
         super();
         this.http = http;
-        this.baseUrl = baseUrl ?? "http://localhost:4280";
+        this.baseUrl = baseUrl ?? "http://localhost:4280/api";
     }
 
     /**
      * @param body (optional) 
-     * @return Created
+     * @return Payload of PersonDTO
      */
     createPerson(body: PersonDTO | undefined): Observable<PersonDTO> {
-        let url_ = this.baseUrl + "/api/v1/person/create";
+        let url_ = this.baseUrl + "/v1/person/create";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -90,6 +90,14 @@ export class ApiService extends BaseService {
             result201 = PersonDTO.fromJS(resultData201);
             return _observableOf(result201);
             }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : _responseText;
+                result400 = resultData400 !== undefined ? resultData400 : null as any;
+    
+            return throwException("Bad request", status, _responseText, _headers, result400);
+            }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -99,10 +107,10 @@ export class ApiService extends BaseService {
     }
 
     /**
-     * @return OK
+     * @return Payload of Array of PersonDTO
      */
     getAllPersons(): Observable<PersonDTO[]> {
-        let url_ = this.baseUrl + "/api/v1/person/get-all";
+        let url_ = this.baseUrl + "/v1/person/get-all";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -160,9 +168,11 @@ export class ApiService extends BaseService {
 }
 
 export class PersonDTO implements IPersonDTO {
-    id?: string | undefined;
-    name?: string | undefined;
-    email?: string | undefined;
+    id?: string;
+    name?: string;
+    email?: string;
+
+    [key: string]: any;
 
     constructor(data?: IPersonDTO) {
         if (data) {
@@ -175,6 +185,10 @@ export class PersonDTO implements IPersonDTO {
 
     init(_data?: any) {
         if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
             this.id = _data["id"];
             this.name = _data["name"];
             this.email = _data["email"];
@@ -190,6 +204,10 @@ export class PersonDTO implements IPersonDTO {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
         data["id"] = this.id;
         data["name"] = this.name;
         data["email"] = this.email;
@@ -198,9 +216,11 @@ export class PersonDTO implements IPersonDTO {
 }
 
 export interface IPersonDTO {
-    id?: string | undefined;
-    name?: string | undefined;
-    email?: string | undefined;
+    id?: string;
+    name?: string;
+    email?: string;
+
+    [key: string]: any;
 }
 
 export class SwaggerException extends Error {
