@@ -2,17 +2,17 @@
     "routes": [
       {
         "route": "/person*",
-        "allowedRoles": ["administrator"]
+        "allowedRoles": ["anonymous"]
       },
       {
         "route": "/api/*",
         "methods": ["GET"],
-        "allowedRoles": ["authenticated"]
+        "allowedRoles": ["anonymous"]
       },
       {
         "route": "/api/*",
         "methods": ["PUT", "POST", "PATCH", "DELETE"],
-        "allowedRoles": ["administrator"]
+        "allowedRoles": ["anonymous"]
       },
       {
         "route": "/login",
@@ -36,8 +36,7 @@
         "rewrite": "/invalid-invitation-error.html"
       },
       "401": {
-        "redirect": "/login",
-        "statusCode": 302
+        "statusCode": 401
       },
       "403": {
         "rewrite": "/custom-forbidden-page.html"

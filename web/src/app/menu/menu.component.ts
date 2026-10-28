@@ -1,7 +1,4 @@
 import { Component } from '@angular/core';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 
 export interface ClientPrincipal {
@@ -18,14 +15,7 @@ export interface ClientPrincipal {
     standalone: false
 })
 export class MenuComponent {
-
-  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
-    .pipe(
-      map(result => result.matches),
-      shareReplay()
-    );
-
-  constructor(private breakpointObserver: BreakpointObserver, private http: HttpClient) {
+  constructor(private http: HttpClient) {
     this.http.get('.auth/me').subscribe((resp: any)=> {
       this.user = resp.clientPrincipal;
     });

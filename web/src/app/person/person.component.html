@@ -1,42 +1,68 @@
-<p>persons works!</p>
+<section class="person-page">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Personen</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">Naam</ion-label>
+        <ion-input
+          placeholder="naam"
+          [(ngModel)]="inputValue"
+          [ngModelOptions]="{standalone: true}">
+        </ion-input>
+      </ion-item>
 
-<form class="example-form">
-  <mat-form-field class="example-full-width" appearance="fill">
-    <mat-label>Welke naam</mat-label>
-    <input matInput placeholder="naam" value="" [(ngModel)]="inputValue" (change)="changeInputValue($event)"
-      [ngModelOptions]="{standalone: true}">
-  </mat-form-field>
-</form>
-<button (click)="getProfile()" mat-fab>save person</button>
-<p>{{ message }}</p>
-<div fxLayout fxLayoutAlign="center center">
-  <mat-form-field fxFlex="40%">
-    <input matInput type="text"  placeholder="Filter">
-  </mat-form-field>
-</div>
+      <ion-item>
+        <ion-label position="stacked">Email (optioneel)</ion-label>
+        <ion-input
+          placeholder="email"
+          type="email"
+          [(ngModel)]="emailValue"
+          [ngModelOptions]="{standalone: true}">
+        </ion-input>
+      </ion-item>
 
-<div class="mat-elevation-z8">
-  <mat-table [dataSource]="datasource" matSort>
+      <ion-button expand="block" class="save-button" (click)="getProfile()">Save person</ion-button>
+      <ion-note *ngIf="message" color="success" class="message">{{ message }}</ion-note>
+      <ion-note *ngIf="errorMessage" color="danger" class="message">{{ errorMessage }}</ion-note>
+    </ion-card-content>
+  </ion-card>
 
-    <ng-container matColumnDef="id">
-      <mat-header-cell *matHeaderCellDef mat-sort-header>id</mat-header-cell>
-      <mat-cell *matCellDef="let element" data-label="rowKey"> {{element.id}} </mat-cell>
-    </ng-container>
+  <ion-item>
+    <ion-label position="stacked">Filter</ion-label>
+    <ion-searchbar
+      [value]="filterValue"
+      (ionInput)="onFilterChange($any($event.target).value ?? '')"
+      placeholder="Filter op id, email of naam">
+    </ion-searchbar>
+  </ion-item>
 
-    <ng-container matColumnDef="email">
-      <mat-header-cell *matHeaderCellDef mat-sort-header>email</mat-header-cell>
-      <mat-cell *matCellDef="let element" data-label="email"> {{element.email}} </mat-cell>
-    </ng-container>
+  <ion-card>
+    <ion-card-content>
+      <ion-grid>
+        <ion-row class="table-header">
+          <ion-col size="2">
+            <ion-button class="sort-button" fill="clear" size="small" (click)="changeSort('id')">ID</ion-button>
+          </ion-col>
+          <ion-col size="5">
+            <ion-button class="sort-button" fill="clear" size="small" (click)="changeSort('email')">Email</ion-button>
+          </ion-col>
+          <ion-col size="5">
+            <ion-button class="sort-button" fill="clear" size="small" (click)="changeSort('name')">Naam</ion-button>
+          </ion-col>
+        </ion-row>
 
-    <ng-container matColumnDef="name">
-      <mat-header-cell *matHeaderCellDef mat-sort-header>name</mat-header-cell>
-      <mat-cell *matCellDef="let element" data-label="name"> {{element.name}} </mat-cell>
-    </ng-container>
+        <ion-row *ngFor="let person of filteredPersons" class="table-row">
+          <ion-col size="2">{{ person.id }}</ion-col>
+          <ion-col size="5">{{ person.email }}</ion-col>
+          <ion-col size="5">{{ person.name }}</ion-col>
+        </ion-row>
 
-    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-
-  </mat-table>
-  <mat-paginator [pageSizeOptions]="[ 10, 25, 100]"></mat-paginator>
-
-</div>
+        <ion-row *ngIf="filteredPersons.length === 0" class="empty-row">
+          <ion-col size="12">Geen personen gevonden.</ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+</section>

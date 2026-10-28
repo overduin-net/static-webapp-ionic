@@ -1,9 +1,5 @@
-import {LiveAnnouncer} from '@angular/cdk/a11y';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ApiService, PersonDTO } from 'src/services/generated/api.service';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort, Sort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
 
 
 @Component({
@@ -15,63 +11,113 @@ import { MatTableDataSource } from '@angular/material/table';
 
 export class PersonComponent implements OnInit {
   message = '';
-  displayedColumns: string[] = ['id', 'email', 'name'];
-  //datasource: PersonDTO[] | any;
-  datasource: MatTableDataSource<PersonDTO>;
+  errorMessage = '';
   public inputValue = '';
-  public persons: PersonDTO[] | undefined;
-
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
+  public emailValue = '';
+  public filterValue = '';
+  public persons: PersonDTO[] = [];
+  public filteredPersons: PersonDTO[] = [];
+  public sortColumn: 'id' | 'email' | 'name' = 'id';
+  public sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(
-    private _liveAnnouncer: LiveAnnouncer,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private cdr: ChangeDetectorRef
   ) { 
     this.inputValue = '';
-    this.loadPersons();
    }
 
   ngOnInit() {
-    // this.inputValue = '';
-    // this.loadPersons();
-  }
-
-  ngAfterViewInit() {
-    
+    this.loadPersons();
   }
 
   getProfile() {
-    if (this.inputValue && this.inputValue != '') {
+    const trimmedName = this.inputValue.trim();
 
-      let person = new PersonDTO();
-      person.name = this.inputValue;
-      let s = this.apiService.createPerson(person).subscribe(x => {
-        console.log("gelukt:", x)
+    if (trimmedName !== '') {
+      this.message = '';
+      this.errorMessage = '';
+
+      const person = new PersonDTO();
+      person.name = trimmedName;
+      person.email = this.emailValue.trim();
+
+      this.apiService.createPerson(person).subscribe({
+        next: () => {
+          this.message = 'Persoon opgeslagen.';
+          this.inputValue = '';
+          this.emailValue = '';
+          this.loadPersons();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          const status = error?.status ? ` (${error.status})` : '';
+          this.errorMessage = `Opslaan mislukt${status}. Controleer of de API op localhost:7071 draait.`;
+        }
       });
     } else {
-      alert('no input value')
+      this.errorMessage = 'Vul eerst een naam in.';
     }
   }
 
-  public doFilter = (value: string) => {
-    this.datasource.filter = value.trim().toLocaleLowerCase();
+  public onFilterChange(value: string) {
+    this.filterValue = value;
+    this.applyFilterAndSort();
   }
 
-  changeInputValue(event: any) {
-    this.inputValue = event.target.value;
-    console.log("input value changed: ", this.inputValue);
+  public changeSort(column: 'id' | 'email' | 'name') {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.applyFilterAndSort();
   }
 
   loadPersons() {
-    this.apiService.getAllPersons().subscribe(
-      res => {
+    this.apiService.getAllPersons().subscribe({
+      next: (res) => {
         if (res) {
-          this.datasource = new MatTableDataSource<PersonDTO>(res);
-          this.datasource.paginator = this.paginator;
-          this.datasource.sort = this.sort;
+          this.persons = res;
+          this.applyFilterAndSort();
+          this.cdr.detectChanges();
         }
+      },
+      error: (error) => {
+        const status = error?.status ? ` (${error.status})` : '';
+        this.errorMessage = `Laden van personen mislukt${status}.`;
       }
-    );
+    });
+  }
+
+  private applyFilterAndSort() {
+    const normalizedFilter = this.filterValue.trim().toLowerCase();
+
+    const filtered = this.persons.filter((person) => {
+      if (!normalizedFilter) {
+        return true;
+      }
+
+      return (`${person.id ?? ''} ${person.email ?? ''} ${person.name ?? ''}`)
+        .toLowerCase()
+        .includes(normalizedFilter);
+    });
+
+    this.filteredPersons = [...filtered].sort((a, b) => {
+      const left = `${a[this.sortColumn] ?? ''}`.toLowerCase();
+      const right = `${b[this.sortColumn] ?? ''}`.toLowerCase();
+
+      if (left < right) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+
+      if (left > right) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+
+      return 0;
+    });
   }
 }

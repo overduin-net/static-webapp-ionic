@@ -51,6 +51,7 @@ public class TableStorageRepository : ITableStorageRepository
         catch (Exception e)
         {
             _loggerHelper.LogInformation($"Exception when trying to insert or merge entity. Message: {e.Message}. StackTrace: {e.StackTrace}");
+            throw;
         }
 
         return entity;

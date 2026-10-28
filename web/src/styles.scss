@@ -1,32 +1,38 @@
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/display.css';
 
+:root {
+  --ion-color-primary: #000000;
+  --ion-color-primary-rgb: 0, 0, 0;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #000000;
+  --ion-color-primary-tint: #1a1a1a;
+}
 
-html, 
-body { 
-    height: 100%; 
+html,
+body,
+ion-app,
+ion-content {
+  height: 100%;
 }
 
 body {
-    margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; 
-    .menu{
-        padding: 0, 50px !important;
-    }
-    .container {
-        width: 1200px;
-        margin: auto; 
-        margin-top: 50px
-    }
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #000000;
+  background: #ffffff;
 }
-@media screen and (max-width: 1200px) {
-    body {
-        margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; 
-        .menu{
-            padding: 0, 50px !important;
-        }
-        .container {
-            width: 100%;
-            margin: auto; 
-            margin-top: 0;
-        }
-    }
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+ion-card {
+  border: 1px solid #e0e0e0;
+  box-shadow: none;
 }

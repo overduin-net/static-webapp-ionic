@@ -1,32 +1,16 @@
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { AppRoutingModule } from './app-routing.module';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { IonicModule } from '@ionic/angular';
 
 import { AppComponent } from './app.component';
-
-import { MatButtonModule } from '@angular/material/button';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatListModule } from '@angular/material/list';
-import { MatSliderModule } from '@angular/material/slider';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSortModule } from '@angular/material/sort';
-import { MatSidenavModule } from '@angular/material/sidenav';
-
-import { LayoutModule } from '@angular/cdk/layout';
 
 import { MenuComponent } from './menu/menu.component';
 import { HomeComponent } from './home/home.component';
 import { PersonComponent } from './person/person.component';
+import { environment } from 'src/environments/environment';
 
 import { AuthService } from 'src/services/auth.service';
 import { ApiService, API_URL } from 'src/services/generated/api.service';
@@ -40,26 +24,10 @@ import { AccountService } from 'src/services/account.service';
     ],
     bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
-        BrowserAnimationsModule,
-        MatButtonModule,
-        MatToolbarModule,
-        MatListModule,
-        MatSliderModule,
-        MatCardModule,
-        MatIconModule,
-        MatToolbarModule,
-        MatButtonModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatTooltipModule,
-        MatMenuModule,
-        MatTableModule,
-        MatPaginatorModule,
-        MatSortModule,
+        IonicModule.forRoot(),
         FormsModule,
-        LayoutModule,
-        MatSidenavModule], providers: [
-        { provide: API_URL, useValue: getOrigin(), deps: [APP_INITIALIZER] },
+    ], providers: [
+        { provide: API_URL, useValue: getApiUrl(environment.apiUrl) },
         AccountService,
         AuthService,
         ApiService,
@@ -67,7 +35,15 @@ import { AccountService } from 'src/services/account.service';
     ] })
 export class AppModule { }
 
-function getOrigin(): string {
-  return window.location.origin;
-}
+function getApiUrl(configuredApiUrl: string): string {
+    if (configuredApiUrl) {
+        return configuredApiUrl;
+    }
 
+    const isAngularDevServer = window.location.hostname === 'localhost' && window.location.port === '4200';
+    if (isAngularDevServer) {
+        return 'http://localhost:7071';
+    }
+
+    return '';
+}
